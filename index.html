@@ -3,41 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <style>
+        /* 画面全体のレイアウト */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* 画面外にはみ出た文字を隠す */
+        }
+
         body { 
             background-color: rgba(0, 0, 0, 0); 
-            margin: 0; 
-            padding: 20px; 
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end; /* 常に下側に中身を寄せる */
+            padding: 20px;
             color: white; 
             font-family: sans-serif;
             font-size: 24px; 
             text-shadow: 2px 2px 2px #000; 
-            overflow: hidden; 
         }
+
+        /* チャットが溜まる箱 */
+        #chat-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            /* スムーズに競り上がるアニメーション（任意） */
+            transition: all 0.3s ease;
+        }
+
         .message { 
-            margin-bottom: 15px; 
             line-height: 1.4;
-            /* 名前とメッセージを並べ、必要に応じて折り返す設定 */
-            display: inline-block;
-            width: 100%;
-            /* ↓これが重要！どんな長文でも画面端で強制的に折り返します */
             word-break: break-all;
             overflow-wrap: anywhere;
+            /* 新しいメッセージがスッと出てくるアニメーション */
+            animation: slideIn 0.2s ease-out forwards;
         }
-        .user-name { 
-            font-weight: bold; 
-            margin-right: 8px;
-            /* 名前は途中で改行させない */
-            white-space: nowrap;
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        .content {
-            /* メッセージは名前のすぐ後ろから開始 */
-            display: inline;
-        }
-        .emote { 
-            vertical-align: middle; 
-            margin: -2px 2px 0; 
-            width: 1.1em;
-        }
+
+        .user-name { font-weight: bold; margin-right: 8px; white-space: nowrap; }
+        .content { display: inline; }
+        .emote { vertical-align: middle; margin: -2px 2px 0; width: 1.1em; }
     </style>
 </head>
 <body>
@@ -72,12 +82,13 @@
                     const container = document.getElementById('chat-container');
                     const div = document.createElement('div');
                     div.className = 'message';
-                    // 構造をシンプルにしてブラウザの自動改行に任せます
                     div.innerHTML = `<span class="user-name" style="color: ${color}">${displayName}:</span><span class="content">${message}</span>`;
                     
                     container.appendChild(div);
 
-                    if (container.childNodes.length > 25) {
+                    // 画面内に残す最大件数（画面の高さに合わせて調整してください）
+                    // 30件くらいにしておくと、古いものが自然に画面の上に押し出されます
+                    if (container.childNodes.length > 30) {
                         container.removeChild(container.firstChild);
                     }
                 }
@@ -102,6 +113,7 @@
                 });
                 return html;
             }
+
             socket.onclose = () => setTimeout(connectTwitch, 5000);
         }
         connectTwitch();
