@@ -8,30 +8,37 @@
             margin: 0; 
             padding: 20px; 
             color: white; 
-            font-family: "Helvetica Neue", Helvetica, Arial, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+            font-family: sans-serif;
             font-size: 24px; 
             text-shadow: 2px 2px 2px #000; 
             overflow: hidden; 
         }
         .message { 
             margin-bottom: 15px; 
-            line-height: 1.6; /* 行間を少し広げて読みやすく */
-            word-wrap: break-word; /* 長い単語を折り返す */
+            line-height: 1.6;
+            word-wrap: break-word; 
             overflow-wrap: break-word; 
-            display: block; /* 名前とメッセージをしっかり分ける準備 */
+            /* フレックスボックスを使って、名前とメッセージの並びを制御します */
+            display: flex;
+            flex-wrap: wrap; 
+            align-items: baseline;
         }
         .user-name { 
             font-weight: bold; 
             margin-right: 8px;
-            display: inline; /* 名前とメッセージを繋げたい場合はinline、分けたい場合はblock */
+            /* 名前が途中で改行されないように固定する */
+            white-space: nowrap; 
+            flex-shrink: 0;
         }
         .content {
-            display: inline; /* ここをblockにすると、名前の下からメッセージが始まります */
+            /* メッセージ部分は自由に改行を許可する */
+            white-space: normal;
+            flex-grow: 1;
         }
         .emote { 
             vertical-align: middle; 
-            margin: -5px 2px 0; 
-            width: 32px; 
+            margin: -2px 2px 0; 
+            width: 1.2em; /* 文字の大きさに合わせる */
         }
     </style>
 </head>
@@ -53,13 +60,11 @@
 
             socket.onmessage = (event) => {
                 const data = event.data;
-                
                 if (data.includes('PRIVMSG')) {
                     const tagPart = data.split(' :')[0];
                     const color = tagPart.match(/color=([^;]+)/)?.[1] || "#ffb86c";
                     const displayName = tagPart.match(/display-name=([^;]+)/)?.[1] || "匿名";
                     const emotesTag = tagPart.match(/emotes=([^;]+)/)?.[1] || "";
-                    
                     let message = data.split(`PRIVMSG #${CHANNEL_NAME} :`)[1].trim();
 
                     if (emotesTag) {
@@ -69,19 +74,15 @@
                     const container = document.getElementById('chat-container');
                     const div = document.createElement('div');
                     div.className = 'message';
-                    
-                    // 名前とメッセージの構造を整理
+                    // 名前とメッセージを別々のタグで囲んで、CSSで制御しやすくします
                     div.innerHTML = `<span class="user-name" style="color: ${color}">${displayName}:</span><span class="content">${message}</span>`;
-                    
                     container.appendChild(div);
 
                     if (container.childNodes.length > 25) {
                         container.removeChild(container.firstChild);
                     }
-                    // 常に最新のコメントが見えるように一番下へスクロール
                     window.scrollTo(0, document.body.scrollHeight);
                 }
-                
                 if (data.startsWith('PING')) socket.send('PONG :tmi.twitch.tv');
             };
 
@@ -103,10 +104,8 @@
                 });
                 return html;
             }
-
             socket.onclose = () => setTimeout(connectTwitch, 5000);
         }
-
         connectTwitch();
     </script>
 </body>
