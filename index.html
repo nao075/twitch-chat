@@ -3,66 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <style>
-        body {
-            background-color: rgba(0, 0, 0, 0); /* 背景透明 */
-            margin: 0;
-            padding: 20px;
-            color: white;
-            font-family: sans-serif;
-            text-shadow: 2px 2px 2px #000;
-            font-size: 24px;
-        }
-        .message {
-            margin-bottom: 10px;
-            animation: fadeIn 0.3s ease-out;
-        }
-        .user-name {
-            font-weight: bold;
-            color: #ffb86c;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateX(-10px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
+        body { background-color: rgba(0, 0, 0, 0); margin: 0; padding: 20px; color: white; font-family: sans-serif; font-size: 24px; text-shadow: 2px 2px 2px #000; }
+        .message { margin-bottom: 10px; }
+        .user-name { font-weight: bold; color: #ffb86c; }
     </style>
 </head>
 <body>
-    <div style="font-size: 14px; color: #aaa;">Twitchチャット接続中...</div>
-    
     <div id="chat-container"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/tmi.js@1.8.5/dist/tmi.min.js"></script>
     
     <script>
-        const CHANNEL_NAME = 'yumochom'; 
+        if (typeof tmi === 'undefined') {
+            document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/tmi.js/1.8.5/tmi.min.js"><\/script>');
+        }
+    </script>
 
-        const client = new tmi.Client({
-            connection: {
-                secure: true,
-                reconnect: true
-            },
-            channels: [CHANNEL_NAME]
-        });
-
-        const container = document.getElementById('chat-container');
-
-client.on('message', (channel, tags, message, self) => {
-            const div = document.createElement('div');
-            div.className = 'message';
+    <script>
+        window.onload = function() {
+            const CHANNEL_NAME = 'nao075';
             
-            // 名前の取得方法を、より確実な username に変更します
-            const name = tags['display-name'] || tags.username;
-            
-            div.innerHTML = `<span class="user-name">${name}:</span> ${message}`;
-            
-            container.appendChild(div);
-
-            if (container.childNodes.length > 20) {
-                container.removeChild(container.firstChild);
+            // 最終チェック
+            if (typeof tmi === 'undefined') {
+                console.error("tmi.jsの読み込みに完全に失敗しました。");
+                return;
             }
-        });
-        console.log("接続を開始します。対象チャンネル:", CHANNEL_NAME);
-        client.connect().catch(console.error);
+
+            const client = new tmi.Client({
+                connection: { secure: true, reconnect: true },
+                channels: [CHANNEL_NAME]
+            });
+
+            const container = document.getElementById('chat-container');
+
+            client.on('message', (channel, tags, message, self) => {
+                const name = tags['display-name'] || tags.username;
+                const div = document.createElement('div');
+                div.className = 'message';
+                div.innerHTML = `<span class="user-name">${name}:</span> ${message}`;
+                container.appendChild(div);
+                if (container.childNodes.length > 20) container.removeChild(container.firstChild);
+            });
+
+            client.connect().catch(e => console.error("接続エラー:", e));
+        };
     </script>
 </body>
 </html>
