@@ -3,11 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <style>
-        body { background-color: rgba(0, 0, 0, 0); margin: 0; padding: 20px; color: white; font-family: sans-serif; font-size: 24px; text-shadow: 2px 2px 2px #000; overflow: hidden; }
-        .message { margin-bottom: 10px; line-height: 1.4; }
-        .user-name { font-weight: bold; margin-right: 8px; }
-        /* スタンプのサイズを調整 */
-        .emote { vertical-align: middle; margin: -5px 2px 0; width: 32px; }
+        body { 
+            background-color: rgba(0, 0, 0, 0); 
+            margin: 0; 
+            padding: 20px; 
+            color: white; 
+            font-family: "Helvetica Neue", Helvetica, Arial, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+            font-size: 24px; 
+            text-shadow: 2px 2px 2px #000; 
+            overflow: hidden; 
+        }
+        .message { 
+            margin-bottom: 15px; 
+            line-height: 1.6; /* 行間を少し広げて読みやすく */
+            word-wrap: break-word; /* 長い単語を折り返す */
+            overflow-wrap: break-word; 
+            display: block; /* 名前とメッセージをしっかり分ける準備 */
+        }
+        .user-name { 
+            font-weight: bold; 
+            margin-right: 8px;
+            display: inline; /* 名前とメッセージを繋げたい場合はinline、分けたい場合はblock */
+        }
+        .content {
+            display: inline; /* ここをblockにすると、名前の下からメッセージが始まります */
+        }
+        .emote { 
+            vertical-align: middle; 
+            margin: -5px 2px 0; 
+            width: 32px; 
+        }
     </style>
 </head>
 <body>
@@ -30,16 +55,13 @@
                 const data = event.data;
                 
                 if (data.includes('PRIVMSG')) {
-                    // タグ情報の解析
                     const tagPart = data.split(' :')[0];
                     const color = tagPart.match(/color=([^;]+)/)?.[1] || "#ffb86c";
                     const displayName = tagPart.match(/display-name=([^;]+)/)?.[1] || "匿名";
                     const emotesTag = tagPart.match(/emotes=([^;]+)/)?.[1] || "";
                     
-                    // メッセージ部分の抽出
                     let message = data.split(`PRIVMSG #${CHANNEL_NAME} :`)[1].trim();
 
-                    // スタンプ（Emote）の置き換え処理
                     if (emotesTag) {
                         message = parseEmotes(message, emotesTag);
                     }
@@ -47,18 +69,22 @@
                     const container = document.getElementById('chat-container');
                     const div = document.createElement('div');
                     div.className = 'message';
-                    div.innerHTML = `<span class="user-name" style="color: ${color}">${displayName}:</span> <span>${message}</span>`;
+                    
+                    // 名前とメッセージの構造を整理
+                    div.innerHTML = `<span class="user-name" style="color: ${color}">${displayName}:</span><span class="content">${message}</span>`;
+                    
                     container.appendChild(div);
 
                     if (container.childNodes.length > 25) {
                         container.removeChild(container.firstChild);
                     }
+                    // 常に最新のコメントが見えるように一番下へスクロール
+                    window.scrollTo(0, document.body.scrollHeight);
                 }
                 
                 if (data.startsWith('PING')) socket.send('PONG :tmi.twitch.tv');
             };
 
-            // スタンプ情報を画像タグに変換する関数
             function parseEmotes(text, emotes) {
                 let emoteList = [];
                 emotes.split('/').forEach(item => {
@@ -68,10 +94,7 @@
                         emoteList.push({ id, start, end });
                     });
                 });
-
-                // 後ろから置き換えないと文字の位置がずれるためソート
                 emoteList.sort((a, b) => b.start - a.start);
-
                 let html = text;
                 emoteList.forEach(emote => {
                     const url = `https://static-cdn.jtvnw.net/emoticons/v2/${emote.id}/default/dark/1.0`;
