@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <style>
-        body { background-color: rgba(0, 0, 0, 0); margin: 0; padding: 20px; color: white; font-family: sans-serif; font-size: 24px; text-shadow: 2px 2px 2px #000; }
-        .message { margin-bottom: 10px; }
-        .user-name { font-weight: bold; color: #ffb86c; }
+        body { background-color: rgba(0, 0, 0, 0); margin: 0; padding: 20px; color: white; font-family: sans-serif; font-size: 24px; text-shadow: 2px 2px 2px #000; overflow: hidden; }
+        .message { margin-bottom: 10px; line-height: 1.4; }
+        .user-name { font-weight: bold; margin-right: 8px; }
+        /* スタンプのサイズを調整 */
+        .emote { vertical-align: middle; margin: -5px 2px 0; width: 32px; }
     </style>
 </head>
 <body>
@@ -15,55 +17,71 @@
         const CHANNEL_NAME = 'nao075';
 
         function connectTwitch() {
-            // WebSocketという通信方式を使ってTwitchのチャットサーバーに直接つなぎます
             const socket = new WebSocket('wss://irc-ws.chat.twitch.tv:443');
 
             socket.onopen = () => {
                 socket.send('CAP REQ :twitch.tv/tags twitch.tv/commands');
-                socket.send('PASS oauth:xdanyway'); // 読み取り専用なのでこのままでOK
+                socket.send('PASS oauth:xdanyway');
                 socket.send('NICK justinfan123');
                 socket.send(`JOIN #${CHANNEL_NAME}`);
-                console.log('Twitchサーバーに接続しました！');
             };
 
             socket.onmessage = (event) => {
                 const data = event.data;
                 
                 if (data.includes('PRIVMSG')) {
-                    // Twitchから色情報を取得。設定がなければ白(#ffffff)にする
-                    const color = data.match(/color=([^;]+)/)?.[1] || "#ffffff";
-                    const displayName = data.match(/display-name=([^;]+)/)?.[1] || "匿名";
-                    const message = data.split(`PRIVMSG #${CHANNEL_NAME} :`)[1];
+                    // タグ情報の解析
+                    const tagPart = data.split(' :')[0];
+                    const color = tagPart.match(/color=([^;]+)/)?.[1] || "#ffb86c";
+                    const displayName = tagPart.match(/display-name=([^;]+)/)?.[1] || "匿名";
+                    const emotesTag = tagPart.match(/emotes=([^;]+)/)?.[1] || "";
+                    
+                    // メッセージ部分の抽出
+                    let message = data.split(`PRIVMSG #${CHANNEL_NAME} :`)[1].trim();
 
-                    if (message) {
-                        const container = document.getElementById('chat-container');
-                        const div = document.createElement('div');
-                        div.className = 'message';
-                        // style="color: ${color}" を追加して、名前の色を動的に変えます
-                        div.innerHTML = `<span class="user-name" style="color: ${color}">${displayName}:</span> ${message.trim()}`;
-                        container.appendChild(div);
+                    // スタンプ（Emote）の置き換え処理
+                    if (emotesTag) {
+                        message = parseEmotes(message, emotesTag);
+                    }
 
-                        if (container.childNodes.length > 20) {
-                            container.removeChild(container.firstChild);
-                        }
-                        // 画面の下に自動スクロール
-                        window.scrollTo(0, document.body.scrollHeight);
+                    const container = document.getElementById('chat-container');
+                    const div = document.createElement('div');
+                    div.className = 'message';
+                    div.innerHTML = `<span class="user-name" style="color: ${color}">${displayName}:</span> <span>${message}</span>`;
+                    container.appendChild(div);
+
+                    if (container.childNodes.length > 25) {
+                        container.removeChild(container.firstChild);
                     }
                 }
                 
-                if (data.startsWith('PING')) {
-                    socket.send('PONG :tmi.twitch.tv');
-                }
-            };
-            
-            socket.onerror = (error) => {
-                console.error('接続エラー:', error);
+                if (data.startsWith('PING')) socket.send('PONG :tmi.twitch.tv');
             };
 
-            socket.onclose = () => {
-                console.log('切断されました。再接続します...');
-                setTimeout(connectTwitch, 5000);
-            };
+            // スタンプ情報を画像タグに変換する関数
+            function parseEmotes(text, emotes) {
+                let emoteList = [];
+                emotes.split('/').forEach(item => {
+                    const [id, ranges] = item.split(':');
+                    ranges.split(',').forEach(range => {
+                        const [start, end] = range.split('-').map(Number);
+                        emoteList.push({ id, start, end });
+                    });
+                });
+
+                // 後ろから置き換えないと文字の位置がずれるためソート
+                emoteList.sort((a, b) => b.start - a.start);
+
+                let html = text;
+                emoteList.forEach(emote => {
+                    const url = `https://static-cdn.jtvnw.net/emoticons/v2/${emote.id}/default/dark/1.0`;
+                    const imgTag = `<img class="emote" src="${url}">`;
+                    html = html.substring(0, emote.start) + imgTag + html.substring(emote.end + 1);
+                });
+                return html;
+            }
+
+            socket.onclose = () => setTimeout(connectTwitch, 5000);
         }
 
         connectTwitch();
