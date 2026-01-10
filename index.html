@@ -11,42 +11,60 @@
 <body>
     <div id="chat-container"></div>
 
-    <script src="https://cdn.jsdelivr.net/npm/tmi.js@1.8.5/dist/tmi.min.js"></script>
-    
     <script>
-        if (typeof tmi === 'undefined') {
-            document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/tmi.js/1.8.5/tmi.min.js"><\/script>');
+        const CHANNEL_NAME = 'nao075';
+
+        function connectTwitch() {
+            // WebSocketという通信方式を使ってTwitchのチャットサーバーに直接つなぎます
+            const socket = new WebSocket('wss://irc-ws.chat.twitch.tv:443');
+
+            socket.onopen = () => {
+                socket.send('CAP REQ :twitch.tv/tags twitch.tv/commands');
+                socket.send('PASS oauth:xdanyway'); // 読み取り専用なのでこのままでOK
+                socket.send('NICK justinfan123');
+                socket.send(`JOIN #${CHANNEL_NAME}`);
+                console.log('Twitchサーバーに接続しました！');
+            };
+
+            socket.onmessage = (event) => {
+                const data = event.data;
+                
+                // チャットメッセージ（PRIVMSG）だけを抽出する
+                if (data.includes('PRIVMSG')) {
+                    const displayName = data.match(/display-name=([^;]+)/)?.[1] || "匿名";
+                    const message = data.split(`PRIVMSG #${CHANNEL_NAME} :`)[1];
+
+                    if (message) {
+                        const container = document.getElementById('chat-container');
+                        const div = document.createElement('div');
+                        div.className = 'message';
+                        div.innerHTML = `<span class="user-name">${displayName}:</span> ${message.trim()}`;
+                        container.appendChild(div);
+
+                        // 20件を超えたら古いものを消す
+                        if (container.childNodes.length > 20) {
+                            container.removeChild(container.firstChild);
+                        }
+                    }
+                }
+                
+                // 接続を維持するための応答
+                if (data.startsWith('PING')) {
+                    socket.send('PONG :tmi.twitch.tv');
+                }
+            };
+
+            socket.onerror = (error) => {
+                console.error('接続エラー:', error);
+            };
+
+            socket.onclose = () => {
+                console.log('切断されました。再接続します...');
+                setTimeout(connectTwitch, 5000);
+            };
         }
-    </script>
 
-    <script>
-        window.onload = function() {
-            const CHANNEL_NAME = 'nao075';
-            
-            // 最終チェック
-            if (typeof tmi === 'undefined') {
-                console.error("tmi.jsの読み込みに完全に失敗しました。");
-                return;
-            }
-
-            const client = new tmi.Client({
-                connection: { secure: true, reconnect: true },
-                channels: [CHANNEL_NAME]
-            });
-
-            const container = document.getElementById('chat-container');
-
-            client.on('message', (channel, tags, message, self) => {
-                const name = tags['display-name'] || tags.username;
-                const div = document.createElement('div');
-                div.className = 'message';
-                div.innerHTML = `<span class="user-name">${name}:</span> ${message}`;
-                container.appendChild(div);
-                if (container.childNodes.length > 20) container.removeChild(container.firstChild);
-            });
-
-            client.connect().catch(e => console.error("接続エラー:", e));
-        };
+        connectTwitch();
     </script>
 </body>
 </html>
