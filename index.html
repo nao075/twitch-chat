@@ -3,34 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <style>
-        /* 背景を透明にし、文字を見やすくします */
         body {
-            background-color: rgba(0, 0, 0, 0);
+            background-color: rgba(0, 0, 0, 0); /* 背景透明 */
             margin: 0;
-            overflow: hidden;
-            font-family: "Helvetica Neue", Arial, sans-serif;
-            color: white;
-            text-shadow: 2px 2px 4px #000; /* 文字の縁取り */
-        }
-
-        #chat-container {
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            height: 100vh;
             padding: 20px;
+            color: white;
+            font-family: sans-serif;
+            text-shadow: 2px 2px 2px #000;
+            font-size: 24px;
         }
-
         .message {
             margin-bottom: 10px;
             animation: fadeIn 0.3s ease-out;
         }
-
         .user-name {
             font-weight: bold;
-            color: #ffb86c; /* 名前の色 */
+            color: #ffb86c;
         }
-
         @keyframes fadeIn {
             from { opacity: 0; transform: translateX(-10px); }
             to { opacity: 1; transform: translateX(0); }
@@ -38,12 +27,14 @@
     </style>
 </head>
 <body>
+    <div style="font-size: 14px; color: #aaa;">Twitchチャット接続中...</div>
+    
     <div id="chat-container"></div>
 
-    <script src="https://unpkg.com/tmi.js@1.8.5/bitbucket.org/tmijs/tmi.js/dist/tmi.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tmi.js@1.8.5/dist/tmi.min.js"></script>
+    
     <script>
-        // 設定：自分のチャンネル名に変更してください
-        const CHANNEL_NAME = 'Nao075'; 
+        const CHANNEL_NAME = 'nao075'; 
 
         const client = new tmi.Client({
             channels: [CHANNEL_NAME]
@@ -58,13 +49,13 @@
             
             container.appendChild(div);
 
-            // 古いメッセージを消す（画面外に溜まりすぎないように）
+            // 20件以上になったら古いものを消す
             if (container.childNodes.length > 20) {
                 container.removeChild(container.firstChild);
             }
         });
 
-        client.connect();
+        client.connect().catch(console.error);
     </script>
 </body>
 </html>
