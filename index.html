@@ -37,6 +37,10 @@
         const CHANNEL_NAME = 'nao075'; 
 
         const client = new tmi.Client({
+            connection: {
+                secure: true,
+                reconnect: true
+            },
             channels: [CHANNEL_NAME]
         });
 
