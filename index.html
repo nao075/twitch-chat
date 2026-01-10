@@ -29,8 +29,9 @@
             socket.onmessage = (event) => {
                 const data = event.data;
                 
-                // チャットメッセージ（PRIVMSG）だけを抽出する
                 if (data.includes('PRIVMSG')) {
+                    // Twitchから色情報を取得。設定がなければ白(#ffffff)にする
+                    const color = data.match(/color=([^;]+)/)?.[1] || "#ffffff";
                     const displayName = data.match(/display-name=([^;]+)/)?.[1] || "匿名";
                     const message = data.split(`PRIVMSG #${CHANNEL_NAME} :`)[1];
 
@@ -38,22 +39,23 @@
                         const container = document.getElementById('chat-container');
                         const div = document.createElement('div');
                         div.className = 'message';
-                        div.innerHTML = `<span class="user-name">${displayName}:</span> ${message.trim()}`;
+                        // style="color: ${color}" を追加して、名前の色を動的に変えます
+                        div.innerHTML = `<span class="user-name" style="color: ${color}">${displayName}:</span> ${message.trim()}`;
                         container.appendChild(div);
 
-                        // 20件を超えたら古いものを消す
                         if (container.childNodes.length > 20) {
                             container.removeChild(container.firstChild);
                         }
+                        // 画面の下に自動スクロール
+                        window.scrollTo(0, document.body.scrollHeight);
                     }
                 }
                 
-                // 接続を維持するための応答
                 if (data.startsWith('PING')) {
                     socket.send('PONG :tmi.twitch.tv');
                 }
             };
-
+            
             socket.onerror = (error) => {
                 console.error('接続エラー:', error);
             };
