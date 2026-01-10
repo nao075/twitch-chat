@@ -42,19 +42,22 @@
 
         const container = document.getElementById('chat-container');
 
-        client.on('message', (channel, tags, message, self) => {
+client.on('message', (channel, tags, message, self) => {
             const div = document.createElement('div');
             div.className = 'message';
-            div.innerHTML = `<span class="user-name">${tags['display-name']}:</span> ${message}`;
+            
+            // 名前の取得方法を、より確実な username に変更します
+            const name = tags['display-name'] || tags.username;
+            
+            div.innerHTML = `<span class="user-name">${name}:</span> ${message}`;
             
             container.appendChild(div);
 
-            // 20件以上になったら古いものを消す
             if (container.childNodes.length > 20) {
                 container.removeChild(container.firstChild);
             }
         });
-
+        
         client.connect().catch(console.error);
     </script>
 </body>
