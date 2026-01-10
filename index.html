@@ -57,7 +57,7 @@ client.on('message', (channel, tags, message, self) => {
                 container.removeChild(container.firstChild);
             }
         });
-        
+        console.log("接続を開始します。対象チャンネル:", CHANNEL_NAME);
         client.connect().catch(console.error);
     </script>
 </body>
