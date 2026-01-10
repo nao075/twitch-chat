@@ -15,30 +15,28 @@
         }
         .message { 
             margin-bottom: 15px; 
-            line-height: 1.6;
-            word-wrap: break-word; 
-            overflow-wrap: break-word; 
-            /* フレックスボックスを使って、名前とメッセージの並びを制御します */
-            display: flex;
-            flex-wrap: wrap; 
-            align-items: baseline;
+            line-height: 1.4;
+            /* 名前とメッセージを並べ、必要に応じて折り返す設定 */
+            display: inline-block;
+            width: 100%;
+            /* ↓これが重要！どんな長文でも画面端で強制的に折り返します */
+            word-break: break-all;
+            overflow-wrap: anywhere;
         }
         .user-name { 
             font-weight: bold; 
             margin-right: 8px;
-            /* 名前が途中で改行されないように固定する */
-            white-space: nowrap; 
-            flex-shrink: 0;
+            /* 名前は途中で改行させない */
+            white-space: nowrap;
         }
         .content {
-            /* メッセージ部分は自由に改行を許可する */
-            white-space: normal;
-            flex-grow: 1;
+            /* メッセージは名前のすぐ後ろから開始 */
+            display: inline;
         }
         .emote { 
             vertical-align: middle; 
             margin: -2px 2px 0; 
-            width: 1.2em; /* 文字の大きさに合わせる */
+            width: 1.1em;
         }
     </style>
 </head>
@@ -74,14 +72,14 @@
                     const container = document.getElementById('chat-container');
                     const div = document.createElement('div');
                     div.className = 'message';
-                    // 名前とメッセージを別々のタグで囲んで、CSSで制御しやすくします
+                    // 構造をシンプルにしてブラウザの自動改行に任せます
                     div.innerHTML = `<span class="user-name" style="color: ${color}">${displayName}:</span><span class="content">${message}</span>`;
+                    
                     container.appendChild(div);
 
                     if (container.childNodes.length > 25) {
                         container.removeChild(container.firstChild);
                     }
-                    window.scrollTo(0, document.body.scrollHeight);
                 }
                 if (data.startsWith('PING')) socket.send('PONG :tmi.twitch.tv');
             };
