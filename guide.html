@@ -3,141 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Twitch Chat Generator - Dark Mode</title>
+    <title>Twitch Chat Generator - Settings</title>
     <style>
-        /* 目に優しいダークパターンの背景 */
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            padding: 40px 20px; 
-            line-height: 1.6; 
-            background-color: #0e0e10; /* Twitchライクな深い背景色 */
-            color: #efeff1; 
-            margin: 0;
-        }
-
-        .card { 
-            background: #1f1f23; 
-            padding: 30px; 
-            border-radius: 12px; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5); 
-            max-width: 450px; 
-            margin: auto; 
-            border: 1px solid #303032;
-        }
-
-        h2 { 
-            margin-top: 0; 
-            color: #bf94ff; 
-            text-align: center;
-            font-size: 1.5rem;
-        }
-
-        label { 
-            display: block; 
-            margin-top: 20px; 
-            font-size: 0.9rem; 
-            color: #adadb8;
-        }
-
-        /* 入力エリアのデザイン */
-        input, select { 
-            width: 100%; 
-            padding: 12px; 
-            margin: 8px 0 20px 0; 
-            border: 2px solid #303032; 
-            border-radius: 6px; 
-            box-sizing: border-box; 
-            background-color: #0e0e10; 
-            color: white;
-            font-size: 1rem;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-
-        input:focus, select:focus {
-            border-color: #9146ff;
-        }
-
-        button { 
-            width: 100%; 
-            padding: 14px; 
-            background: #9146ff; 
-            color: white; 
-            border: none; 
-            border-radius: 6px; 
-            cursor: pointer; 
-            font-weight: bold; 
-            font-size: 1rem;
-            transition: background 0.2s;
-        }
-
-        button:hover { 
-            background: #772ce8; 
-        }
-
-        .result { 
-            background: #26262c; 
-            padding: 15px; 
-            margin-top: 25px; 
-            word-break: break-all; 
-            font-size: 0.85rem; 
-            border-radius: 6px; 
-            display: none; 
-            border-left: 4px solid #9146ff;
-            color: #adadb8;
-        }
-
-        .footer {
-            text-align: center;
-            margin-top: 20px;
-            font-size: 0.8rem;
-            color: #53535f;
-        }
+        body { font-family: sans-serif; padding: 40px 20px; background-color: #0e0e10; color: #efeff1; margin: 0; }
+        .card { background: #1f1f23; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); max-width: 450px; margin: auto; border: 1px solid #303032; }
+        h2 { margin-top: 0; color: #bf94ff; text-align: center; }
+        label { display: block; margin-top: 15px; font-size: 0.85rem; color: #adadb8; }
+        input, select { width: 100%; padding: 10px; margin: 5px 0 10px 0; border: 2px solid #303032; border-radius: 6px; background-color: #0e0e10; color: white; box-sizing: border-box; }
+        .checkbox-group { display: flex; align-items: center; margin: 15px 0; cursor: pointer; }
+        .checkbox-group input { width: auto; margin: 0 10px 0 0; }
+        .ignore-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        button { width: 100%; padding: 14px; background: #9146ff; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 20px; }
+        button:hover { background: #772ce8; }
+        .result { background: #26262c; padding: 15px; margin-top: 25px; word-break: break-all; font-size: 0.8rem; border-radius: 6px; display: none; border-left: 4px solid #9146ff; }
     </style>
 </head>
 <body>
     <div class="card">
         <h2>チャットURL作成ツール</h2>
         
-        <label for="channel">Twitch チャンネル名</label>
-        <input type="text" id="channel" placeholder="例: nao075">
+        <label>Twitch チャンネル名</label>
+        <input type="text" id="channel" placeholder="nao075">
 
-        <label for="size">フォントサイズ</label>
+        <label>フォントサイズ</label>
         <select id="size">
-            <option value="16">16px (かなり小さい)</option>
-            <option value="20">20px (小さめ)</option>
-            <option value="24" selected>24px (標準)</option>
-            <option value="28">28px (少し大きめ)</option>
-            <option value="32">32px (目立つ)</option>
-            <option value="40">40px (大きい)</option>
-            <option value="48">48px (かなり大きい)</option>
-            <option value="64">64px (特大)</option>
-            <option value="72">72px (最大級)</option>
+            <option value="20">20px</option>
+            <option value="24" selected>24px</option>
+            <option value="32">32px</option>
+            <option value="48">48px</option>
         </select>
 
+        <div class="checkbox-group">
+            <input type="checkbox" id="hidecmd">
+            <label for="hidecmd" style="margin:0; color: white;">「!」から始まるコマンドを隠す</label>
+        </div>
+
+        <label>除外するユーザーID (ボットなど)</label>
+        <div class="ignore-grid">
+            <input type="text" class="ignore-id" placeholder="ID 1">
+            <input type="text" class="ignore-id" placeholder="ID 2">
+            <input type="text" class="ignore-id" placeholder="ID 3">
+            <input type="text" class="ignore-id" placeholder="ID 4">
+            <input type="text" class="ignore-id" placeholder="ID 5">
+            <input type="text" class="ignore-id" placeholder="ID 6">
+        </div>
+
         <button onclick="generateURL()">URLを生成してコピー</button>
-        
         <div id="result" class="result"></div>
-    </div>
-    
-    <div class="footer">
-        生成されたURLをOBSのブラウザソースに貼り付けてください
     </div>
 
     <script>
         function generateURL() {
             const channel = document.getElementById('channel').value.trim() || 'nao075';
             const size = document.getElementById('size').value;
+            const hidecmd = document.getElementById('hidecmd').checked;
             
-            // 現在のファイル名(guide.html)を削って、同じ階層のindex.htmlへのフルパスを作成
+            // 除外リストの作成
+            const ignoreInputs = document.querySelectorAll('.ignore-id');
+            const ignoreList = Array.from(ignoreInputs)
+                .map(input => input.value.trim())
+                .filter(val => val !== "")
+                .join(',');
+
             const baseURL = window.location.href.split('guide.html')[0] + 'index.html';
-            const finalURL = `${baseURL}?channel=${channel}&size=${size}`;
+            let finalURL = `${baseURL}?channel=${channel}&size=${size}&hidecmd=${hidecmd}`;
+            if (ignoreList) finalURL += `&ignore=${ignoreList}`;
             
             const resultDiv = document.getElementById('result');
             resultDiv.innerText = finalURL;
             resultDiv.style.display = 'block';
 
-            // クリップボードへコピー
             const tempInput = document.createElement("textarea");
             tempInput.value = finalURL;
             document.body.appendChild(tempInput);
@@ -145,7 +80,7 @@
             document.execCommand("copy");
             document.body.removeChild(tempInput);
 
-            alert("URLをコピーしました！\nOBSのブラウザソースに貼り付けてください。");
+            alert("URLをコピーしました！");
         }
     </script>
 </body>

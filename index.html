@@ -21,12 +21,12 @@
 <body>
     <div id="chat-container"></div>
     <script>
-        // --- URLからパラメータを取得 ---
         const urlParams = new URLSearchParams(window.location.search);
-        const CHANNEL_NAME = urlParams.get('channel') || 'nao075'; // デフォルト値
+        const CHANNEL_NAME = urlParams.get('channel') || 'nao075';
         const FONT_SIZE = urlParams.get('size') || '24';
-        
-        // フォントサイズを適用
+        const HIDE_COMMANDS = urlParams.get('hidecmd') === 'true'; // コマンド非表示設定
+        const IGNORE_USERS = (urlParams.get('ignore') || '').toLowerCase().split(','); // 除外リスト
+
         document.body.style.fontSize = FONT_SIZE + 'px';
 
         function connectTwitch() {
@@ -41,10 +41,18 @@
                 const data = event.data;
                 if (data.includes('PRIVMSG')) {
                     const tagPart = data.split(' :')[0];
+                    const username = data.match(/:([^!]+)!/)?.[1] || "";
                     const color = tagPart.match(/color=([^;]+)/)?.[1] || "#ffb86c";
-                    const displayName = tagPart.match(/display-name=([^;]+)/)?.[1] || "匿名";
+                    const displayName = tagPart.match(/display-name=([^;]+)/)?.[1] || username;
                     const emotesTag = tagPart.match(/emotes=([^;]+)/)?.[1] || "";
                     let message = data.split(`PRIVMSG #${CHANNEL_NAME.toLowerCase()} :`)[1].trim();
+
+                    // --- 非表示フィルタリング ---
+                    // 1. 除外ユーザーチェック
+                    if (IGNORE_USERS.includes(username.toLowerCase())) return;
+                    // 2. コマンド（!）チェック
+                    if (HIDE_COMMANDS && message.startsWith('!')) return;
+
                     if (emotesTag) message = parseEmotes(message, emotesTag);
                     const container = document.getElementById('chat-container');
                     const div = document.createElement('div');
@@ -55,6 +63,7 @@
                 }
                 if (data.startsWith('PING')) socket.send('PONG :tmi.twitch.tv');
             };
+
             function parseEmotes(text, emotes) {
                 let emoteList = [];
                 emotes.split('/').forEach(item => {
