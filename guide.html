@@ -6,22 +6,41 @@
     <title>Twitch Chat Generator</title>
     <style>
         body { font-family: sans-serif; padding: 20px; background-color: #0e0e10; color: #efeff1; }
-        .card { background: #1f1f23; padding: 25px; border-radius: 12px; max-width: 480px; margin: auto; border: 1px solid #303032; }
+        .card { background: #1f1f23; padding: 25px; border-radius: 12px; max-width: 500px; margin: auto; border: 1px solid #303032; }
         h2 { color: #bf94ff; text-align: center; margin-bottom: 25px; }
         label { display: block; margin-top: 15px; font-size: 0.85rem; color: #adadb8; }
         input, select { width: 100%; padding: 10px; margin-top: 5px; border: 2px solid #303032; border-radius: 6px; background-color: #0e0e10; color: white; box-sizing: border-box; }
         .row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .checkbox-group { display: flex; align-items: center; margin: 15px 0; }
-        .checkbox-group input { width: auto; margin-right: 10px; }
+        .checkbox-group { display: flex; align-items: center; margin-top: 30px; }
+        .checkbox-group input { width: auto; margin-right: 8px; }
         .ignore-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 5px; }
         button { width: 100%; padding: 14px; background: #9146ff; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 25px; font-size: 1rem; }
         button:hover { background: #772ce8; }
         .result { background: #26262c; padding: 15px; margin-top: 20px; word-break: break-all; font-size: 0.8rem; border-radius: 6px; border-left: 4px solid #9146ff; display: none; }
+        
+        /* 色プレビュー用のスタイル */
+        .color-preview-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px; /* セレクトボックスとプレビューの間の隙間 */
+        }
+        .color-preview {
+            width: 28px; /* プレビューの幅 */
+            height: 28px; /* プレビューの高さ */
+            border: 1px solid #555; /* プレビューの枠線 */
+            border-radius: 4px; /* 角丸 */
+            background-color: white; /* デフォルトの色 */
+        }
+        /* selectタグがwrapper内にあるため幅調整 */
+        .color-preview-wrapper select {
+            flex-grow: 1; /* セレクトボックスが残りのスペースを埋める */
+            width: auto; /* width: 100% を上書き */
+        }
     </style>
 </head>
 <body>
     <div class="card">
-        <h2>チャット設定</h2>
+        <h2>チャット詳細設定</h2>
         
         <label>Twitch チャンネル名</label>
         <input type="text" id="channel" placeholder="nao075">
@@ -34,46 +53,57 @@
                     <option value="24" selected>24px</option>
                     <option value="32">32px</option>
                     <option value="40">40px</option>
+                    <option value="48">48px</option>
                 </select>
             </div>
-            <div>
-                <label>コマンドの表示</label>
-                <div class="checkbox-group">
-                    <input type="checkbox" id="hidecmd">
-                    <span style="font-size:0.8rem">!コマンドを隠す</span>
-                </div>
+            <div class="checkbox-group">
+                <input type="checkbox" id="hidecmd">
+                <span style="font-size:0.8rem">!コマンドを隠す</span>
             </div>
         </div>
 
         <div class="row">
             <div>
                 <label>名前の色</label>
-                <select id="namecolor">
-                    <option value="twitch">Twitchユーザー設定</option>
-                    <option value="#ffffff">ホワイト</option>
-                    <option value="#ffb86c">オレンジ</option>
-                    <option value="#ff79c6">ピンク</option>
-                    <option value="#8be9fd">水色</option>
-                    <option value="#50fa7b">黄緑</option>
-                </select>
+                <div class="color-preview-wrapper">
+                    <select id="namecolor" onchange="updateColorPreview('namecolor', 'name-preview')">
+                        <option value="twitch" selected>Twitch準拠</option>
+                        <option value="White">White</option><option value="Silver">Silver</option>
+                        <option value="Gray">Gray</option><option value="Black">Black</option>
+                        <option value="Red">Red</option><option value="Maroon">Maroon</option>
+                        <option value="Yellow">Yellow</option><option value="Olive">Olive</option>
+                        <option value="Lime">Lime</option><option value="Green">Green</option>
+                        <option value="Aqua">Aqua</option><option value="Teal">Teal</option>
+                        <option value="Blue">Blue</option><option value="Navy">Navy</option>
+                        <option value="Fuchsia">Fuchsia</option><option value="Purple">Purple</option>
+                    </select>
+                    <span id="name-preview" class="color-preview"></span>
+                </div>
             </div>
             <div>
-                <label>本文の色</label>
-                <select id="msgcolor">
-                    <option value="#ffffff" selected>ホワイト</option>
-                    <option value="#f8f8f2">オフホワイト</option>
-                    <option value="#adadb8">グレー</option>
-                    <option value="#ffff00">イエロー</option>
-                </select>
+                <label>コメントの色</label>
+                <div class="color-preview-wrapper">
+                    <select id="msgcolor" onchange="updateColorPreview('msgcolor', 'msg-preview')">
+                        <option value="White" selected>White</option><option value="Silver">Silver</option>
+                        <option value="Gray">Gray</option><option value="Black">Black</option>
+                        <option value="Red">Red</option><option value="Maroon">Maroon</option>
+                        <option value="Yellow">Yellow</option><option value="Olive">Olive</option>
+                        <option value="Lime">Lime</option><option value="Green">Green</option>
+                        <option value="Aqua">Aqua</option><option value="Teal">Teal</option>
+                        <option value="Blue">Blue</option><option value="Navy">Navy</option>
+                        <option value="Fuchsia">Fuchsia</option><option value="Purple">Purple</option>
+                    </select>
+                    <span id="msg-preview" class="color-preview"></span>
+                </div>
             </div>
         </div>
 
         <label>除外するユーザーID</label>
         <div class="ignore-grid">
-            <input type="text" class="ignore-id" placeholder="bot名1">
-            <input type="text" class="ignore-id" placeholder="bot名2">
-            <input type="text" class="ignore-id" placeholder="bot名3">
-            <input type="text" class="ignore-id" placeholder="bot名4">
+            <input type="text" class="ignore-id" placeholder="bot1">
+            <input type="text" class="ignore-id" placeholder="bot2">
+            <input type="text" class="ignore-id" placeholder="bot3">
+            <input type="text" class="ignore-id" placeholder="bot4">
         </div>
 
         <button onclick="generateURL()">URLを生成してコピー</button>
@@ -81,30 +111,41 @@
     </div>
 
     <script>
+        // ページロード時にプレビューを初期化
+        document.addEventListener('DOMContentLoaded', () => {
+            updateColorPreview('namecolor', 'name-preview');
+            updateColorPreview('msgcolor', 'msg-preview');
+        });
+
+        function updateColorPreview(selectId, previewId) {
+            const selectElement = document.getElementById(selectId);
+            const previewElement = document.getElementById(previewId);
+            const selectedValue = selectElement.value;
+            
+            if (selectedValue === 'twitch') {
+                previewElement.style.backgroundColor = 'transparent'; // Twitch準拠の場合は透明に
+                previewElement.style.border = '1px dashed #adadb8'; // ダッシュ線でわかるように
+            } else {
+                previewElement.style.backgroundColor = selectedValue;
+                previewElement.style.border = '1px solid #555'; // 通常の枠線に戻す
+            }
+        }
+
         function generateURL() {
             const channel = document.getElementById('channel').value.trim() || 'nao075';
             const size = document.getElementById('size').value;
             const hidecmd = document.getElementById('hidecmd').checked;
             const namecolor = document.getElementById('namecolor').value;
             const msgcolor = document.getElementById('msgcolor').value;
-            
-            const ignoreList = Array.from(document.querySelectorAll('.ignore-id'))
-                .map(i => i.value.trim()).filter(v => v).join(',');
+            const ignoreList = Array.from(document.querySelectorAll('.ignore-id')).map(i => i.value.trim()).filter(v => v).join(',');
 
             const baseURL = window.location.href.split('guide.html')[0] + 'index.html';
-            let url = `${baseURL}?channel=${channel}&size=${size}&hidecmd=${hidecmd}&namecolor=${encodeURIComponent(namecolor)}&msgcolor=${encodeURIComponent(msgcolor)}`;
+            let url = `${baseURL}?channel=${channel}&size=${size}&hidecmd=${hidecmd}&namecolor=${namecolor}&msgcolor=${msgcolor}`;
             if (ignoreList) url += `&ignore=${ignoreList}`;
             
             document.getElementById('result').innerText = url;
             document.getElementById('result').style.display = 'block';
-
-            const el = document.createElement('textarea');
-            el.value = url;
-            document.body.appendChild(el);
-            el.select();
-            document.execCommand('copy');
-            document.body.removeChild(el);
-
+            const el = document.createElement('textarea'); el.value = url; document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el);
             alert("URLをコピーしました！");
         }
     </script>
