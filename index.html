@@ -3,51 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <style>
-        html, body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            /* 背景を透明に（OBS用） */
-            background-color: rgba(0, 0, 0, 0); 
-        }
-
+        html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; background: transparent; }
         body { 
-            display: flex;
-            flex-direction: column;
-            /* 下端にピッタリではなく、少し上に浮かせるための余白 */
-            justify-content: flex-end; 
-            padding-bottom: 40px; /* ここで一番下の「浮き」を調整します */
-            padding-left: 20px;
-            padding-right: 20px;
-            box-sizing: border-box; /* パディングを高さに含める設定 */
-            
-            color: white; 
-            font-family: sans-serif;
-            font-size: 24px; 
+            display: flex; flex-direction: column; justify-content: flex-end; 
+            padding: 20px 20px 40px 20px; box-sizing: border-box;
+            color: white; font-family: sans-serif; 
             text-shadow: 2px 2px 2px #000; 
         }
-
-        #chat-container {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            /* 下から上へ、自然に積み上がる設定 */
-            width: 100%;
-        }
-
-        .message { 
-            line-height: 1.4;
-            word-break: break-all;
-            overflow-wrap: anywhere;
-            animation: slideIn 0.2s ease-out forwards;
-        }
-
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
+        #chat-container { display: flex; flex-direction: column; gap: 12px; width: 100%; }
+        .message { line-height: 1.4; word-break: break-all; overflow-wrap: anywhere; animation: slideIn 0.2s ease-out forwards; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .user-name { font-weight: bold; margin-right: 8px; white-space: nowrap; }
         .content { display: inline; }
         .emote { vertical-align: middle; margin: -2px 2px 0; width: 1.1em; }
@@ -55,20 +20,23 @@
 </head>
 <body>
     <div id="chat-container"></div>
-
     <script>
-        const CHANNEL_NAME = 'nao075';
+        // --- URLからパラメータを取得 ---
+        const urlParams = new URLSearchParams(window.location.search);
+        const CHANNEL_NAME = urlParams.get('channel') || 'nao075'; // デフォルト値
+        const FONT_SIZE = urlParams.get('size') || '24';
+        
+        // フォントサイズを適用
+        document.body.style.fontSize = FONT_SIZE + 'px';
 
         function connectTwitch() {
             const socket = new WebSocket('wss://irc-ws.chat.twitch.tv:443');
-
             socket.onopen = () => {
                 socket.send('CAP REQ :twitch.tv/tags twitch.tv/commands');
                 socket.send('PASS oauth:xdanyway');
                 socket.send('NICK justinfan123');
-                socket.send(`JOIN #${CHANNEL_NAME}`);
+                socket.send(`JOIN #${CHANNEL_NAME.toLowerCase()}`);
             };
-
             socket.onmessage = (event) => {
                 const data = event.data;
                 if (data.includes('PRIVMSG')) {
@@ -76,26 +44,17 @@
                     const color = tagPart.match(/color=([^;]+)/)?.[1] || "#ffb86c";
                     const displayName = tagPart.match(/display-name=([^;]+)/)?.[1] || "匿名";
                     const emotesTag = tagPart.match(/emotes=([^;]+)/)?.[1] || "";
-                    let message = data.split(`PRIVMSG #${CHANNEL_NAME} :`)[1].trim();
-
-                    if (emotesTag) {
-                        message = parseEmotes(message, emotesTag);
-                    }
-
+                    let message = data.split(`PRIVMSG #${CHANNEL_NAME.toLowerCase()} :`)[1].trim();
+                    if (emotesTag) message = parseEmotes(message, emotesTag);
                     const container = document.getElementById('chat-container');
                     const div = document.createElement('div');
                     div.className = 'message';
                     div.innerHTML = `<span class="user-name" style="color: ${color}">${displayName}:</span><span class="content">${message}</span>`;
-                    
                     container.appendChild(div);
-
-                    if (container.childNodes.length > 30) {
-                        container.removeChild(container.firstChild);
-                    }
+                    if (container.childNodes.length > 30) container.removeChild(container.firstChild);
                 }
                 if (data.startsWith('PING')) socket.send('PONG :tmi.twitch.tv');
             };
-
             function parseEmotes(text, emotes) {
                 let emoteList = [];
                 emotes.split('/').forEach(item => {
@@ -114,7 +73,6 @@
                 });
                 return html;
             }
-
             socket.onclose = () => setTimeout(connectTwitch, 5000);
         }
         connectTwitch();

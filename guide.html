@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Twitch Chat Generator</title>
+    <style>
+        body { font-family: sans-serif; padding: 40px; line-height: 1.6; background: #f0f2f5; }
+        .card { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); max-width: 500px; margin: auto; }
+        input { width: 100%; padding: 10px; margin: 10px 0 20px 0; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #9146FF; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #772ce8; }
+        .result { background: #eee; padding: 15px; margin-top: 20px; word-break: break-all; font-size: 0.9em; border-radius: 4px; display: none; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>チャットURL生成器</h2>
+        <label>Twitch ID:</label>
+        <input type="text" id="channel" placeholder="nao075">
+        <label>フォントサイズ (px):</label>
+        <input type="number" id="size" value="24">
+        <button onclick="generateURL()">URLを生成してコピー</button>
+        <div id="result" class="result"></div>
+    </div>
+
+    <script>
+        function generateURL() {
+            const channel = document.getElementById('channel').value || 'nao075';
+            const size = document.getElementById('size').value || '24';
+            // 現在のURLからguide.htmlを削ってindex.htmlのURLを作る
+            const baseURL = window.location.href.replace('guide.html', 'index.html');
+            const finalURL = `${baseURL}?channel=${channel}&size=${size}`;
+            
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerText = finalURL;
+            resultDiv.style.display = 'block';
+
+            navigator.clipboard.writeText(finalURL).then(() => {
+                alert("URLをコピーしました！OBSに貼り付けてください。");
+            });
+        }
+    </script>
+</body>
+</html>
