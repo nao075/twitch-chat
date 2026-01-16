@@ -3,49 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Twitch Chat Generator - Settings</title>
+    <title>Twitch Chat Generator</title>
     <style>
-        body { font-family: sans-serif; padding: 40px 20px; background-color: #0e0e10; color: #efeff1; margin: 0; }
-        .card { background: #1f1f23; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); max-width: 450px; margin: auto; border: 1px solid #303032; }
-        h2 { margin-top: 0; color: #bf94ff; text-align: center; }
+        body { font-family: sans-serif; padding: 20px; background-color: #0e0e10; color: #efeff1; }
+        .card { background: #1f1f23; padding: 25px; border-radius: 12px; max-width: 480px; margin: auto; border: 1px solid #303032; }
+        h2 { color: #bf94ff; text-align: center; margin-bottom: 25px; }
         label { display: block; margin-top: 15px; font-size: 0.85rem; color: #adadb8; }
-        input, select { width: 100%; padding: 10px; margin: 5px 0 10px 0; border: 2px solid #303032; border-radius: 6px; background-color: #0e0e10; color: white; box-sizing: border-box; }
-        .checkbox-group { display: flex; align-items: center; margin: 15px 0; cursor: pointer; }
-        .checkbox-group input { width: auto; margin: 0 10px 0 0; }
-        .ignore-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        button { width: 100%; padding: 14px; background: #9146ff; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 20px; }
+        input, select { width: 100%; padding: 10px; margin-top: 5px; border: 2px solid #303032; border-radius: 6px; background-color: #0e0e10; color: white; box-sizing: border-box; }
+        .row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .checkbox-group { display: flex; align-items: center; margin: 15px 0; }
+        .checkbox-group input { width: auto; margin-right: 10px; }
+        .ignore-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 5px; }
+        button { width: 100%; padding: 14px; background: #9146ff; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 25px; font-size: 1rem; }
         button:hover { background: #772ce8; }
-        .result { background: #26262c; padding: 15px; margin-top: 25px; word-break: break-all; font-size: 0.8rem; border-radius: 6px; display: none; border-left: 4px solid #9146ff; }
+        .result { background: #26262c; padding: 15px; margin-top: 20px; word-break: break-all; font-size: 0.8rem; border-radius: 6px; border-left: 4px solid #9146ff; display: none; }
     </style>
 </head>
 <body>
     <div class="card">
-        <h2>チャットURL作成ツール</h2>
+        <h2>チャット設定</h2>
         
         <label>Twitch チャンネル名</label>
         <input type="text" id="channel" placeholder="nao075">
 
-        <label>フォントサイズ</label>
-        <select id="size">
-            <option value="20">20px</option>
-            <option value="24" selected>24px</option>
-            <option value="32">32px</option>
-            <option value="48">48px</option>
-        </select>
-
-        <div class="checkbox-group">
-            <input type="checkbox" id="hidecmd">
-            <label for="hidecmd" style="margin:0; color: white;">「!」から始まるコマンドを隠す</label>
+        <div class="row">
+            <div>
+                <label>フォントサイズ</label>
+                <select id="size">
+                    <option value="20">20px</option>
+                    <option value="24" selected>24px</option>
+                    <option value="32">32px</option>
+                    <option value="40">40px</option>
+                </select>
+            </div>
+            <div>
+                <label>コマンドの表示</label>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="hidecmd">
+                    <span style="font-size:0.8rem">!コマンドを隠す</span>
+                </div>
+            </div>
         </div>
 
-        <label>除外するユーザーID (ボットなど)</label>
+        <div class="row">
+            <div>
+                <label>名前の色</label>
+                <select id="namecolor">
+                    <option value="twitch">Twitchユーザー設定</option>
+                    <option value="#ffffff">ホワイト</option>
+                    <option value="#ffb86c">オレンジ</option>
+                    <option value="#ff79c6">ピンク</option>
+                    <option value="#8be9fd">水色</option>
+                    <option value="#50fa7b">黄緑</option>
+                </select>
+            </div>
+            <div>
+                <label>本文の色</label>
+                <select id="msgcolor">
+                    <option value="#ffffff" selected>ホワイト</option>
+                    <option value="#f8f8f2">オフホワイト</option>
+                    <option value="#adadb8">グレー</option>
+                    <option value="#ffff00">イエロー</option>
+                </select>
+            </div>
+        </div>
+
+        <label>除外するユーザーID</label>
         <div class="ignore-grid">
-            <input type="text" class="ignore-id" placeholder="ID 1">
-            <input type="text" class="ignore-id" placeholder="ID 2">
-            <input type="text" class="ignore-id" placeholder="ID 3">
-            <input type="text" class="ignore-id" placeholder="ID 4">
-            <input type="text" class="ignore-id" placeholder="ID 5">
-            <input type="text" class="ignore-id" placeholder="ID 6">
+            <input type="text" class="ignore-id" placeholder="bot名1">
+            <input type="text" class="ignore-id" placeholder="bot名2">
+            <input type="text" class="ignore-id" placeholder="bot名3">
+            <input type="text" class="ignore-id" placeholder="bot名4">
         </div>
 
         <button onclick="generateURL()">URLを生成してコピー</button>
@@ -57,28 +85,25 @@
             const channel = document.getElementById('channel').value.trim() || 'nao075';
             const size = document.getElementById('size').value;
             const hidecmd = document.getElementById('hidecmd').checked;
+            const namecolor = document.getElementById('namecolor').value;
+            const msgcolor = document.getElementById('msgcolor').value;
             
-            // 除外リストの作成
-            const ignoreInputs = document.querySelectorAll('.ignore-id');
-            const ignoreList = Array.from(ignoreInputs)
-                .map(input => input.value.trim())
-                .filter(val => val !== "")
-                .join(',');
+            const ignoreList = Array.from(document.querySelectorAll('.ignore-id'))
+                .map(i => i.value.trim()).filter(v => v).join(',');
 
             const baseURL = window.location.href.split('guide.html')[0] + 'index.html';
-            let finalURL = `${baseURL}?channel=${channel}&size=${size}&hidecmd=${hidecmd}`;
-            if (ignoreList) finalURL += `&ignore=${ignoreList}`;
+            let url = `${baseURL}?channel=${channel}&size=${size}&hidecmd=${hidecmd}&namecolor=${encodeURIComponent(namecolor)}&msgcolor=${encodeURIComponent(msgcolor)}`;
+            if (ignoreList) url += `&ignore=${ignoreList}`;
             
-            const resultDiv = document.getElementById('result');
-            resultDiv.innerText = finalURL;
-            resultDiv.style.display = 'block';
+            document.getElementById('result').innerText = url;
+            document.getElementById('result').style.display = 'block';
 
-            const tempInput = document.createElement("textarea");
-            tempInput.value = finalURL;
-            document.body.appendChild(tempInput);
-            tempInput.select();
-            document.execCommand("copy");
-            document.body.removeChild(tempInput);
+            const el = document.createElement('textarea');
+            el.value = url;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
 
             alert("URLをコピーしました！");
         }

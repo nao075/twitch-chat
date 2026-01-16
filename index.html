@@ -24,8 +24,12 @@
         const urlParams = new URLSearchParams(window.location.search);
         const CHANNEL_NAME = urlParams.get('channel') || 'nao075';
         const FONT_SIZE = urlParams.get('size') || '24';
-        const HIDE_COMMANDS = urlParams.get('hidecmd') === 'true'; // コマンド非表示設定
-        const IGNORE_USERS = (urlParams.get('ignore') || '').toLowerCase().split(','); // 除外リスト
+        const HIDE_COMMANDS = urlParams.get('hidecmd') === 'true';
+        const IGNORE_USERS = (urlParams.get('ignore') || '').toLowerCase().split(',');
+        
+        // --- 色の設定取得 ---
+        const NAME_COLOR_MODE = urlParams.get('namecolor') || 'twitch'; // twitch or 固定色
+        const MSG_COLOR = urlParams.get('msgcolor') || '#ffffff';
 
         document.body.style.fontSize = FONT_SIZE + 'px';
 
@@ -42,22 +46,28 @@
                 if (data.includes('PRIVMSG')) {
                     const tagPart = data.split(' :')[0];
                     const username = data.match(/:([^!]+)!/)?.[1] || "";
-                    const color = tagPart.match(/color=([^;]+)/)?.[1] || "#ffb86c";
+                    
+                    // 名前の色決定
+                    let color = tagPart.match(/color=([^;]+)/)?.[1] || "#ffb86c";
+                    if (NAME_COLOR_MODE !== 'twitch') {
+                        color = NAME_COLOR_MODE; // 指定された固定色を使用
+                    }
+
                     const displayName = tagPart.match(/display-name=([^;]+)/)?.[1] || username;
                     const emotesTag = tagPart.match(/emotes=([^;]+)/)?.[1] || "";
                     let message = data.split(`PRIVMSG #${CHANNEL_NAME.toLowerCase()} :`)[1].trim();
 
-                    // --- 非表示フィルタリング ---
-                    // 1. 除外ユーザーチェック
                     if (IGNORE_USERS.includes(username.toLowerCase())) return;
-                    // 2. コマンド（!）チェック
                     if (HIDE_COMMANDS && message.startsWith('!')) return;
 
                     if (emotesTag) message = parseEmotes(message, emotesTag);
                     const container = document.getElementById('chat-container');
                     const div = document.createElement('div');
                     div.className = 'message';
-                    div.innerHTML = `<span class="user-name" style="color: ${color}">${displayName}:</span><span class="content">${message}</span>`;
+                    
+                    // 本文の色(MSG_COLOR)を適用
+                    div.innerHTML = `<span class="user-name" style="color: ${color}">${displayName}:</span><span class="content" style="color: ${MSG_COLOR}">${message}</span>`;
+                    
                     container.appendChild(div);
                     if (container.childNodes.length > 30) container.removeChild(container.firstChild);
                 }
